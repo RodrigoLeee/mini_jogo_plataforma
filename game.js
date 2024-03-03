@@ -1,12 +1,12 @@
 window.onload = function() { //CONFIGURAÇÃO DAS CENAS
     const config = { 
         type: Phaser.AUTO,
-        width: 800,
-        height: 600,
+        width: 800, //Largura da Tela
+        height: 600, //Altura da ela
         physics: {
-            default: 'arcade',
+            default: 'arcade', //Tipo de fisica, arcade
             arcade: {
-                gravity: { y: 200 },
+                gravity: { y: 200 }, //Gravidade do jogo
                 debug: false 
             }
         },
