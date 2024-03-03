@@ -7,7 +7,7 @@ window.onload = function() { //CONFIGURAÇÃO DAS CENAS
             default: 'arcade',
             arcade: {
                 gravity: { y: 200 },
-                debug: true 
+                debug: false 
             }
         },
         scene: [Cena01, Cena02] //Ordem de qual cena carrega em qual ordem
