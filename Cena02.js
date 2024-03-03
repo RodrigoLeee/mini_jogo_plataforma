@@ -1,11 +1,9 @@
 class Cena02 extends Phaser.Scene {
     constructor(player, platforms, platform_meio, cursors, baterias, rochas, scoreText, broken_ship, pueira_gravidade) {
         super('Cena02');
- 
         //Definindo variáveis a serem utilizadas utilizando uma LISTA
         //LISTA com variáveis a serem utilizadas
         var lista_variaveis = [player, platforms, platform_meio, cursors, baterias, rochas, scoreText, broken_ship, pueira_gravidade]
-        
         //Definindo variáveis a serem utilizadas utilizando o LOOP FOR
         //LOOP FOR que define as variáveis do objeto a serem utilizadas
         for (var x in lista_variaveis) {
@@ -18,7 +16,7 @@ class Cena02 extends Phaser.Scene {
     }
 
     preload() {
-        //Carrega imagens 
+        //Carrega IMAGENS e SPRITESHEET
         this.load.image('sky', 'assets/sky.png');
         this.load.image('ground', 'assets/platform.png');
         this.load.image('bateria', 'assets/bateria.png');
@@ -30,13 +28,13 @@ class Cena02 extends Phaser.Scene {
     }
 
     create() {
-        //Background
+        //Adiciona Background
         this.add.image(400, 300, 'sky');
 
         //Plataformas Gerais
         this.platforms = this.physics.add.staticGroup(); //Define a física das plataformas
-        this.platforms.create(400, 568, 'ground').setScale(2).refreshBody();  
-        this.platforms.create(750, 220, 'ground');
+        this.platforms.create(400, 568, 'ground').setScale(2).refreshBody(); //Cria 1a plataforma - Chão do mapa inteiro
+        this.platforms.create(750, 220, 'ground'); //Cria 2a plataforoma - Em cima do mapa
         
         //Plataforma que se mexe
         this.platform_meio = this.physics.add.sprite(200, 400, 'platform_meio'); //Plataforma do meio
@@ -53,8 +51,8 @@ class Cena02 extends Phaser.Scene {
         this.player.setCollideWorldBounds(true); //Colisão borda do mapa
 
         //Cria a pueira/gravidade
-        this.pueira_gravidade = this.add.sprite(0, 0, 'pueira_gravidade');
-        this.pueira_gravidade.setVisible(false)
+        this.pueira_gravidade = this.add.sprite(0, 0, 'pueira_gravidade'); //Adiciona sprite da pueira_gravidade
+        this.pueira_gravidade.setVisible(false) //Define a pueira_gravidade como invisível
 
         //Animação para esquerda, Player
         this.anims.create({ 
@@ -80,7 +78,7 @@ class Cena02 extends Phaser.Scene {
         //Recebe input cursores do teclado
         this.cursors = this.input.keyboard.createCursorKeys();
         
-        //Stars
+        //Baterias
         this.baterias = this.physics.add.group({ //Define a fisica das baterias
             key: 'bateria', //Define o nome do frame
             repeat: 4, //Define quantas vezes repetir 11
@@ -101,8 +99,8 @@ class Cena02 extends Phaser.Scene {
         //Colisões entre diferentes ELEMENTOS do jogo
         //Colisões principalmente dos outros ELEMENTOS com as PLATAFORMAS
         this.physics.add.collider(this.player, this.platforms); 
-        this.physics.add.collider(this.baterias, this.platforms);
-        this.physics.add.collider(this.rochas, this.platforms);
+        this.physics.add.collider(this.baterias, this.platforms); 
+        this.physics.add.collider(this.rochas, this.platforms); 
 
         //Colisões principalmente dos outros ELEMENTOS com a PLATAFORMA QUE SE MEXE 
         this.physics.add.collider(this.player, this.platform_meio); 
@@ -120,20 +118,23 @@ class Cena02 extends Phaser.Scene {
     update(){
         if (this.cursors.left.isDown) //Movimento no eixo X para esquerda, PLAYER
         {
+            //Movimento
             this.player.setVelocityX(-250);
-    
+            //Animação
             this.player.anims.play('left', true);
         }
         else if (this.cursors.right.isDown) //Movimento no eixo X para direita, PLAYER
         {
+            //Movimento
             this.player.setVelocityX(250);
-    
+            //Animação
             this.player.anims.play('right', true);
         }
         else
         {
+            //Movimento
             this.player.setVelocityX(0); //Nenhum movimento no eixo X, PLAYER
-    
+            //Animação
             this.player.anims.play('turn');
         }
         if (this.cursors.up.isDown && this.player.body.touching.down) //Movimento para cima, pular, eixo Y, PLAYER
@@ -147,16 +148,16 @@ class Cena02 extends Phaser.Scene {
             //pueira_gravidade se torna invisível
             this.pueira_gravidade.setVisible(false);
         }
+        //Definea posição da pueira, constantemente no update mas fica ou visível ou invisível
         this.pueira_gravidade.setPosition(this.player.x, this.player.y + this.player.height/2);
     }
 }
 
+//Reseta score
 var score = 0;
-
 function collectStar (player, bateria) //Funcao de pegar estrela
 {
     bateria.disableBody(true, true); //disable depois de entrar em contato
-
     //  Add and update the score
     score += 100;
     this.scoreText.setText('Score: ' + score); //Muda score
