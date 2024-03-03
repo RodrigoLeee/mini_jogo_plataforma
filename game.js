@@ -6,8 +6,8 @@ window.onload = function() { //CONFIGURAÇÃO DAS CENAS
         physics: {
             default: 'arcade',
             arcade: {
-                gravity: { y: 300 },
-                debug: false 
+                gravity: { y: 200 },
+                debug: true 
             }
         },
         scene: [Cena01, Cena02] //Ordem de qual cena carrega em qual ordem

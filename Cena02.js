@@ -1,43 +1,55 @@
 class Cena02 extends Phaser.Scene {
-    constructor(player, platforms, cursors, stars, bombs, scoreText) {
+    constructor(player, platforms, platform_meio, cursors, baterias, rochas, scoreText, broken_ship) {
         super('Cena02');
+ 
+        //Definindo variáveis a serem utilizadas utilizando uma LISTA
+        //LISTA com variáveis a serem utilizadas
+        var lista_variaveis = [player, platforms, platform_meio, cursors, baterias, rochas, scoreText, broken_ship]
         
-        //definindo variáveis a serem utilizadas
-        this.player = player;
-        this.platforms = platforms;
-        this.cursors = cursors;
-        this.stars = stars;
-        this.bombs = bombs;
-        this.scoreText = scoreText;
+        //Definindo variáveis a serem utilizadas utilizando o LOOP FOR
+        //LOOP FOR que define as variáveis do objeto a serem utilizadas
+        for (var x in lista_variaveis) {
+            var guarda_valor = lista_variaveis[x];
+            this.guarda_valor = lista_variaveis[x];
+        }
     }
 
-    init() {
-    
+    init() {    
     }
 
     preload() {
+        //Carrega imagens 
         this.load.image('sky', 'assets/sky.png');
         this.load.image('ground', 'assets/platform.png');
-        this.load.image('star', 'assets/star.png');
+        this.load.image('bateria', 'assets/bateria.png');
         this.load.spritesheet('dude', 'assets/dude.png', { frameWidth: 32, frameHeight: 48 });
-        this.load.image('bomb', 'assets/bomb.png');
+        this.load.image('rochas', 'assets/rochas.png');
+        this.load.image('platform_meio', 'assets/platform_meio.png')
+        this.load.image('broken_ship', 'assets/broken_ship.png')
     }
 
     create() {
         //Background
         this.add.image(400, 300, 'sky');
 
-        //Plataformas
-        this.platforms = this.physics.add.staticGroup();
+        //Plataformas Gerais
+        this.platforms = this.physics.add.staticGroup(); //Define a física das plataformas
         this.platforms.create(400, 568, 'ground').setScale(2).refreshBody();  
-        this.platforms.create(600, 400, 'ground'); 
-        this.platforms.create(50, 250, 'ground');
         this.platforms.create(750, 220, 'ground');
-
+        
+        //Plataforma que se mexe
+        this.platform_meio = this.physics.add.sprite(200, 400, 'platform_meio'); //Plataforma do meio
+        this.platform_meio.body.allowGravity = false; //Desliga a gravidade da plataforma
+        this.platform_meio.body.setCollideWorldBounds(true); //Colisão com bordas do jogo
+        this.platform_meio.body.immovable = true; //Objeto não pode ser mexido por colisões
+        this.platform_meio.body.setBounce(1); //Objeto bate e volta com a mesma velocidade
+        this.platform_meio.body.setVelocityX(100); //Velocidade da plataforma eixo X
+        
         //Player
+        //Adiciona física ao player, bounce e colisão com borda do mapa
         this.player = this.physics.add.sprite(100, 450, 'dude');
-        this.player.setBounce(0.2); 
-        this.player.setCollideWorldBounds(true);
+        this.player.setBounce(0.3); //Bounce do player
+        this.player.setCollideWorldBounds(true); //Colisão borda do mapa
 
         //Animação para esquerda, Player
         this.anims.create({ 
@@ -60,97 +72,107 @@ class Cena02 extends Phaser.Scene {
             repeat: -1 
         });
 
+        //Recebe input cursores do teclado
         this.cursors = this.input.keyboard.createCursorKeys();
         
         //Stars
-        this.stars = this.physics.add.group({ //Define a fisica dos stars
-            key: 'star', //Define o nome do frame
-            repeat: 11, //Define quantas vezes repetir
-            setXY: { x: 12, y: 0, stepX: 70 } //Define a posicao da estrela e numero de pixels para estrelas
+        this.baterias = this.physics.add.group({ //Define a fisica das baterias
+            key: 'bateria', //Define o nome do frame
+            repeat: 4, //Define quantas vezes repetir 11
+            setXY: { x: 20, y: 0, stepX: 190 } //Define a posicao da estrela e numero de pixels para estrelas
         });
 
-        this.stars.children.iterate(function (child) {
-            child.setBounceY(Phaser.Math.FloatBetween(0.4, 0.8));
+        this.baterias.children.iterate(function (child) {
+            child.setBounceY(Phaser.Math.FloatBetween(0, 0.5)); //Quanto bate e volta 
+            child.setCollideWorldBounds = true; //Baterias possuem colisões com borda do mundo, para não sairem da tela
         });    
 
-        //Bomba
-        this.bombs = this.physics.add.group();
+        //Rocha, define a física
+        this.rochas = this.physics.add.group();
 
         //Placar
-        this.scoreText = this.add.text(16, 16, 'score: 0', { fontSize: '32px', fill: '#000' });
+        this.scoreText = this.add.text(16, 16, 'Placar: 0', { fontSize: '32px', fill: '#000' });
 
-        //Colisões
-        this.physics.add.collider(this.player, this.platforms); //Colisao entre player, estrelas e bombas COM AS PLATAFORMAS
-        this.physics.add.collider(this.stars, this.platforms);
-        this.physics.add.collider(this.bombs, this.platforms);
+        //Colisões entre diferentes ELEMENTOS do jogo
+        //Colisões principalmente dos outros ELEMENTOS com as PLATAFORMAS
+        this.physics.add.collider(this.player, this.platforms); 
+        this.physics.add.collider(this.baterias, this.platforms);
+        this.physics.add.collider(this.rochas, this.platforms);
 
-        this.physics.add.overlap(this.player, this.stars, collectStar, null, this);
-        this.physics.add.collider(this.player, this.bombs, hitBomb, null, this);
+        //Colisões principalmente dos outros ELEMENTOS com a PLATAFORMA QUE SE MEXE 
+        this.physics.add.collider(this.player, this.platform_meio); 
+        this.physics.add.collider(this.baterias, this.platform_meio);
+        this.physics.add.collider(this.rochas, this.platform_meio);
+
+        //Colisão, overlap e interação do PLAYER com outros ELEMENTOS (Bateria e rochas)
+        this.physics.add.overlap(this.player, this.baterias, collectStar, null, this);
+        this.physics.add.collider(this.player, this.rochas, hitRocha, null, this);
+
+        //Sprite decorativo da nave quebrada
+        this.broken_ship = this.add.sprite(120, 565, 'broken_ship');
     }
 
     update(){
-        if (this.cursors.left.isDown) //Movimento no eixo X para esquerda
+        if (this.cursors.left.isDown) //Movimento no eixo X para esquerda, PLAYER
         {
-            this.player.setVelocityX(-160);
+            this.player.setVelocityX(-250);
     
             this.player.anims.play('left', true);
         }
-        else if (this.cursors.right.isDown) //Movimento no eixo X para direita
+        else if (this.cursors.right.isDown) //Movimento no eixo X para direita, PLAYER
         {
-            this.player.setVelocityX(160);
+            this.player.setVelocityX(250);
     
             this.player.anims.play('right', true);
         }
         else
         {
-            this.player.setVelocityX(0); //Nenhum movimento no eixo X
+            this.player.setVelocityX(0); //Nenhum movimento no eixo X, PLAYER
     
             this.player.anims.play('turn');
         }
-    
-        if (this.cursors.up.isDown && this.player.body.touching.down) //Movimento para cima, pular, eixo Y
+        if (this.cursors.up.isDown && this.player.body.touching.down) //Movimento para cima, pular, eixo Y, PLAYER
         {
-            this.player.setVelocityY(-330);
+            this.player.setVelocityY(-300);
         }
     }
 }
 
 var score = 0;
 
-function collectStar (player, star) //Funcao de pegar estrela
+function collectStar (player, bateria) //Funcao de pegar estrela
 {
-    star.disableBody(true, true); //disable depois de entrar em contato
+    bateria.disableBody(true, true); //disable depois de entrar em contato
 
     //  Add and update the score
-    score += 10;
+    score += 100;
     this.scoreText.setText('Score: ' + score); //Muda score
 
-    if (this.stars.countActive(true) === 0) //Se existe ZERO eestrelas na tela
+    if (this.baterias.countActive(true) === 0) //Se existe zero baterias na tela
     {
         //  A new batch of stars to collect
-        this.stars.children.iterate(function (child) {
-
-            child.enableBody(true, child.x, 0, true, true); //enable as stars, denovo
-
+        this.baterias.children.iterate(function (child) {
+            child.enableBody(true, child.x, 0, true, true); //enable as baterias, denovo
         });
 
-        var x = (player.x < 400) ? Phaser.Math.Between(400, 800) : Phaser.Math.Between(0, 400); //Procura posicao posicao do player
+        var x = (player.x < 400) ? Phaser.Math.Between(600, 800) : Phaser.Math.Between(0, 200); //Procura posicao posicao do player
 
-        var bomb = this.bombs.create(x, 16, 'bomb'); //cria bomba
-        bomb.setBounce(1);
-        bomb.setCollideWorldBounds(true);
-        bomb.setVelocity(Phaser.Math.Between(-200, 200), 20);
-        bomb.allowGravity = false;
+        var rocha = this.rochas.create(x, 16, 'rochas'); //cria rochas
+        rocha.setBounce(1); //Rochas batem no chão e voltam
+        rocha.setCollideWorldBounds(true); //Rochas contato com chão
+        rocha.setVelocity(Phaser.Math.Between(-450, 450), 20); //Velocidade das rochas
+        rocha.allowGravity = false; //Rochas não possuem gravidade, INÉRCIA
 
     }
 }
 
-function hitBomb (player, bomb, score) //Player entrar em contato com a bomba, se torna vermelho
+function hitRocha (player, rocha, score) //Player entrar em contato com a rochas, se torna vermelho
 {
-    this.physics.pause();
+    this.physics.pause(); //Pausa fisica do jogo
 
-    player.setTint(0xff0000);
+    player.setTint(0xff0000); //Vermelho
 
-    player.anims.play('turn');
+    player.anims.play('turn'); //Animação olhando para frente
 
+    window.location.reload(); //Recomeça jogo
 }
