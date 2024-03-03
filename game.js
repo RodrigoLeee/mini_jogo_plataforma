@@ -1,10 +1,15 @@
 window.onload = function() { //CONFIGURAÇÃO DAS CENAS
     const config = { 
         type: Phaser.AUTO,
-        parent: 'phaser-example',
         width: 800,
         height: 600,
-        backgroundColor: "b9eaff",
+        physics: {
+            default: 'arcade',
+            arcade: {
+                gravity: { y: 300 },
+                debug: false 
+            }
+        },
         scene: [Cena01, Cena02] //Ordem de qual cena carrega em qual ordem
     };
 
