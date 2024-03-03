@@ -1,6 +1,8 @@
 class Cena01 extends Phaser.Scene {
-    constructor() {
+    constructor(botao) {
         super('Cena01');
+
+        this.botao = botao
     }
 
     preload(){
@@ -11,7 +13,8 @@ class Cena01 extends Phaser.Scene {
 
     create() { 
         this.add.image(400, 300, 'intro')
-        this.add.image(400, 500, 'bt_play').setInteractive().on(Phaser.Input.Events.GAMEOBJECT_POINTER_DOWN, () =>{
+        this.botao = this.add.image(400, 500, 'bt_play').setInteractive()
+        this.botao.on(Phaser.Input.Events.GAMEOBJECT_POINTER_DOWN, () =>{
             this.scene.start('Cena02');
         })
     }

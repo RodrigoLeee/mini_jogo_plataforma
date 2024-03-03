@@ -1,10 +1,10 @@
 class Cena02 extends Phaser.Scene {
-    constructor(player, platforms, platform_meio, cursors, baterias, rochas, scoreText, broken_ship) {
+    constructor(player, platforms, platform_meio, cursors, baterias, rochas, scoreText, broken_ship, pueira_gravidade) {
         super('Cena02');
  
         //Definindo variáveis a serem utilizadas utilizando uma LISTA
         //LISTA com variáveis a serem utilizadas
-        var lista_variaveis = [player, platforms, platform_meio, cursors, baterias, rochas, scoreText, broken_ship]
+        var lista_variaveis = [player, platforms, platform_meio, cursors, baterias, rochas, scoreText, broken_ship, pueira_gravidade]
         
         //Definindo variáveis a serem utilizadas utilizando o LOOP FOR
         //LOOP FOR que define as variáveis do objeto a serem utilizadas
@@ -26,6 +26,7 @@ class Cena02 extends Phaser.Scene {
         this.load.image('rochas', 'assets/rochas.png');
         this.load.image('platform_meio', 'assets/platform_meio.png')
         this.load.image('broken_ship', 'assets/broken_ship.png')
+        this.load.image('pueira_gravidade', 'assets/pueira_gravidade.png')
     }
 
     create() {
@@ -50,6 +51,10 @@ class Cena02 extends Phaser.Scene {
         this.player = this.physics.add.sprite(100, 450, 'dude');
         this.player.setBounce(0.3); //Bounce do player
         this.player.setCollideWorldBounds(true); //Colisão borda do mapa
+
+        //Cria a pueira/gravidade
+        this.pueira_gravidade = this.add.sprite(0, 0, 'pueira_gravidade');
+        this.pueira_gravidade.setVisible(false)
 
         //Animação para esquerda, Player
         this.anims.create({ 
@@ -133,8 +138,16 @@ class Cena02 extends Phaser.Scene {
         }
         if (this.cursors.up.isDown && this.player.body.touching.down) //Movimento para cima, pular, eixo Y, PLAYER
         {
+            //Velocidade do player no eixo Y
             this.player.setVelocityY(-300);
+            //Quando o player pula, pueira_gravidade apareçe
+            this.pueira_gravidade.setVisible(true);
         }
+        else {
+            //pueira_gravidade se torna invisível
+            this.pueira_gravidade.setVisible(false);
+        }
+        this.pueira_gravidade.setPosition(this.player.x, this.player.y + this.player.height/2);
     }
 }
 
